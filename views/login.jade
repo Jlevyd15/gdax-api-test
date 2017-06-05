@@ -1,0 +1,30 @@
+extends layout
+
+block content
+	h1= Login
+	p Welcome, please enter your info
+	form(action='/data/login', method='post')
+		div key
+		input(name='key')
+		div secret
+		input(name='secret')
+		div passphrase
+		input(name='passphrase')
+		div
+			button(type='submit') Submit
+	if(typeof gdaxData !== 'undefined')
+			table(style="border: 1px solid black; border-collapse: collapse;")
+				th Id
+				th Currency
+				th Balance
+				th Avaliable Amount
+				th hold
+				each data, i in gdaxData
+					tr
+						td= data.id
+						td= data.currency
+						td= data.balance
+						td= data.available
+						td= data.hold
+	else
+		p data goes here
