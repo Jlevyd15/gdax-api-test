@@ -8,30 +8,32 @@ router.get('/login', function(req, res, next) {
 	res.render('login')
 })
 
- var mock_accounts = [ { id: '84214645-0323-4525-b55b-e446806e7924',
-    currency: 'USD',
-    balance: '3000.0000000000000000',
-    available: '0.0000000000000000',
-    hold: '3000.0000000000000000',
-    profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' },
-  { id: '133956bd-6fea-4668-8a90-2e037f32856f',
-    currency: 'LTC',
-    balance: '0.0000000000000000',
-    available: '0.0000000000000000',
-    hold: '0.0000000000000000',
-    profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' },
-  { id: 'f8b46e0b-071d-4ec6-b4d2-43bc1310e9d1',
-    currency: 'ETH',
-    balance: '0.0000000000000000',
-    available: '0.0000000000000000',
-    hold: '0.0000000000000000',
-    profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' },
-  { id: 'ed9274db-0389-418b-b2ef-da6244c8c3b4',
-    currency: 'BTC',
-    balance: '0.0000000000000000',
-    available: '0.0000000000000000',
-    hold: '0.0000000000000000',
-    profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' } ]
+ var mock_accounts = [ 
+	{ id: '84214645-0323-4525-b55b-e446806e7924',
+	currency: 'USD',
+	balance: '3000.0000000000000000',
+	available: '0.0000000000000000',
+	hold: '3000.0000000000000000',
+	profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' },
+	{ id: '133956bd-6fea-4668-8a90-2e037f32856f',
+	currency: 'LTC',
+	balance: '0.0000000000000000',
+	available: '0.0000000000000000',
+	hold: '0.0000000000000000',
+	profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' },
+	{ id: 'f8b46e0b-071d-4ec6-b4d2-43bc1310e9d1',
+	currency: 'ETH',
+	balance: '0.0000000000000000',
+	available: '0.0000000000000000',
+	hold: '0.0000000000000000',
+	profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' },
+	{ id: 'ed9274db-0389-418b-b2ef-da6244c8c3b4',
+	currency: 'BTC',
+	balance: '0.0000000000000000',
+	available: '0.0000000000000000',
+	hold: '0.0000000000000000',
+	profile_id: 'cd38fbdb-8ece-4921-8120-8c74189bc120' }
+]
 
 var mock_orders = [
     {
@@ -92,36 +94,48 @@ router.post('/login', function(req, res, next) {
 
 	var authedClient = new Gdax.AuthenticatedClient(gdaxKey, b64secret, gdaxPassphrase);
 	var responseObject = {}
+	// responseObject.accountInfo = []
+	// responseObject.orders = []
+	// responseObject.fills = []
 	authedClient.getAccounts(function(err, response, data) {
-		if (err) {
-			console.error('There was an error: ', err)
+		if (err || data.message) {
+			console.error('There was an error: ', err || data.message)
+			responseObject.error = 'There was an error, ' + data.message
+			res.render('login', { gdaxData: responseObject })
 		} else {
-			console.log('response is successfull: ', data)
+			console.log('account response is successfull: ', data)
  			responseObject.accountInfo = data
-		}
-	})
-	authedClient.getFills(function(err, response, data) {
-		if (err) {
-			console.error('There was an error: ', err)
-		} else {
-			console.log('response is successfull: ', data)
- 			responseObject.fills = data
-		}
-	})
-	authedClient.getOrders(function(err, response, data) {
-		if (err) {
-			console.error('There was an error: ', err)
-		} else {
-			console.log('response is successfull: ', data)
- 			responseObject.orders = data
+
+ 			authedClient.getFills(function(err, response, data) {
+				if (err || data.message) {
+					console.error('There was an error: ', err || data.message)
+					responseObject.error = 'There was an error, ' + data.message
+					res.render('login', { gdaxData: responseObject })
+				} else {
+					console.log('fill response is successfull: ', data)
+		 			responseObject.fills = data
+
+		 			authedClient.getOrders(function(err, response, data) {
+						if (err || data.message) {
+							console.error('There was an error: ', err || data.message)
+							responseObject.error = 'There was an error, ' + data.message
+							res.render('login', { gdaxData: responseObject })
+						} else {
+							console.log('order response is successfull: ', data)
+				 			responseObject.orders = data
+
+				 			console.log('responseObject', responseObject)
+				 			// now that all callbacks are chained we can return the response to the client
+				 			res.render('login', { gdaxData: responseObject })
+						}
+					})
+				}
+			})
 		}
 	})
 	// responseObject.accountInfo = mock_accounts
 	// responseObject.orders = mock_orders
 	// responseObject.fills = mock_fills
-	res.render('login', { gdaxData: responseObject })
-	//test data
-	// body = [{"id":"84214645-0323-4525-b55b-e446806e7924","currency":"USD","balance":"test","available":"test","hold":"test","profile_id":"cd38fbdb-8ece-4921-8120-8c74189bc120"},{"id":"133956bd-6fea-4668-8a90-2e037f32856f","currency":"LTC","balance":"0.0000000000000000","available":"0.0000000000000000","hold":"0.0000000000000000","profile_id":"cd38fbdb-8ece-4921-8120-8c74189bc120"},{"id":"f8b46e0b-071d-4ec6-b4d2-43bc1310e9d1","currency":"ETH","balance":"0.0000000000000000","available":"0.0000000000000000","hold":"0.0000000000000000","profile_id":"cd38fbdb-8ece-4921-8120-8c74189bc120"},{"id":"ed9274db-0389-418b-b2ef-da6244c8c3b4","currency":"BTC","balance":"0.0000000000000000","available":"0.0000000000000000","hold":"0.0000000000000000","profile_id":"cd38fbdb-8ece-4921-8120-8c74189bc120"}]
 })
 
 module.exports = router;

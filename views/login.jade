@@ -12,78 +12,79 @@ block content
 		input(name='passphrase')
 		div
 			button(type='submit') Submit
-	if(typeof gdaxData !== 'undefined')
+	if (gdaxData)
 		h2 Account Info.
-		table(style="border: 1px solid black; border-collapse: collapse;")
-			th Id
-			th Currency
-			th Balance
-			th Avaliable Amount
-			th hold
-			each data, i in gdaxData.accountInfo
-				tr
-					td= data.id
-					td= data.currency
-					td= data.balance
-					td= data.available
-					td= data.hold
-	else
-		p data goes here
-	if(typeof gdaxData !== 'undefined')
+		if(typeof gdaxData.accountInfo !== 'undefined')
+			table(style="border: 1px solid black; border-collapse: collapse;")
+				th Id
+				th Currency
+				th Balance
+				th Avaliable Amount
+				th hold
+				each data, i in gdaxData.accountInfo
+					tr
+						td= data.id
+						td= data.currency
+						td= data.balance
+						td= data.available
+						td= data.hold
+		else
+			p no data found
 		h2 Order History
-		table(style="border: 1px solid black; border-collapse: collapse;")
-			th Price
-			th Size
-			th Stp
-			th Type
-			th Time in force
-			th Post only
-			th Created at
-			th Fills fees
-			th Filled size
-			th Executed value
-			th Status
-			th Settled
-			each data, i in gdaxData.orders
-				tr
-					td= data.price
-					td= data.size
-					td= data.stp
-					td= data.type
-					td= data.time_in_force
-					td= data.post_only
-					td= data.created_at
-					td= data.fill_fees
-					td= data.filled_size
-					td= data.executed_value
-					td= data.status
-					td= data.settled
-	else
-		p data goes here
-	if(typeof gdaxData !== 'undefined')
+		if(gdaxData.hasOwnProperty('orders') && gdaxData.orders.length > 0)
+			table(style="border: 1px solid black; border-collapse: collapse;")
+				th Price
+				th Size
+				th Stp
+				th Type
+				th Time in force
+				th Post only
+				th Created at
+				th Fills fees
+				th Filled size
+				th Executed value
+				th Status
+				th Settled
+				each data, i in gdaxData.orders
+					tr
+						td= data.price
+						td= data.size
+						td= data.stp
+						td= data.type
+						td= data.time_in_force
+						td= data.post_only
+						td= data.created_at
+						td= data.fill_fees
+						td= data.filled_size
+						td= data.executed_value
+						td= data.status
+						td= data.settled
+		else
+			p no data found
 		h2 Fills
-		table(style="border: 1px solid black; border-collapse: collapse;")
-			th Trade Id
-			th Product Id
-			th Price
-			th Size
-			th Order Id
-			th Created on
-			th Liquidity
-			th Fee
-			th Settled
-			th Side
-			each data, i in gdaxData.fills
-				tr
-					td= data.trade_id
-					td= data.product_id
-					td= data.price
-					td= data.size
-					td= data.order_id
-					td= data.created_at
-					td= data.liquidity
-					td= data.fee
-					td= data.settled
-					td= data.side
-	else
-		p data goes here
+		if(typeof gdaxData.fills !== 'undefined')
+			table(style="border: 1px solid black; border-collapse: collapse;")
+				th Trade Id
+				th Product Id
+				th Price
+				th Size
+				th Order Id
+				th Created on
+				th Liquidity
+				th Fee
+				th Settled
+				th Side
+				each data, i in gdaxData.fills
+					tr
+						td= data.trade_id
+						td= data.product_id
+						td= data.price
+						td= data.size
+						td= data.order_id
+						td= data.created_at
+						td= data.liquidity
+						td= data.fee
+						td= data.settled
+						td= data.side
+		else
+			p no data found
