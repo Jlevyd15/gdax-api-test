@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Gdax = require('gdax');
+var request = require('request')
 
 
 router.get('/login', function(req, res, next) {
@@ -8,7 +9,7 @@ router.get('/login', function(req, res, next) {
 	res.render('login')
 })
 
- var mock_accounts = [ 
+var mock_accounts = [ 
 	{ id: '84214645-0323-4525-b55b-e446806e7924',
 	currency: 'USD',
 	balance: '3000.0000000000000000',
@@ -87,55 +88,147 @@ var mock_fills = [
     }
 ]
 
+// router.post('/login', function(req, res, next) {
+// 	var gdaxKey = req.body.key;
+// 	var b64secret = Buffer(req.body.secret, 'base64');
+// 	var gdaxPassphrase = req.body.passphrase;
+
+// 	var authedClient = new Gdax.AuthenticatedClient(gdaxKey, b64secret, gdaxPassphrase);
+// 	var responseObject = {}
+// 	// responseObject.accountInfo = []
+// 	// responseObject.orders = []
+// 	// responseObject.fills = []
+// 	authedClient.getAccounts(function(err, response, data) {
+// 		if (err || data.message) {
+// 			console.error('There was an error: ', err || data.message)
+// 			responseObject.error = 'There was an error, ' + data.message
+// 			res.render('login', { gdaxData: responseObject })
+// 		} else {
+// 			console.log('account response is successfull: ', data)
+//  			responseObject.accountInfo = data
+
+//  			authedClient.getFills(function(err, response, data) {
+// 				if (err || data.message) {
+// 					console.error('There was an error: ', err || data.message)
+// 					responseObject.error = 'There was an error, ' + data.message
+// 					res.render('login', { gdaxData: responseObject })
+// 				} else {
+// 					console.log('fill response is successfull: ', data)
+// 		 			responseObject.fills = data
+
+// 		 			authedClient.getOrders(function(err, response, data) {
+// 						if (err || data.message) {
+// 							console.error('There was an error: ', err || data.message)
+// 							responseObject.error = 'There was an error, ' + data.message
+// 							res.render('login', { gdaxData: responseObject })
+// 						} else {
+// 							console.log('order response is successfull: ', data)
+// 				 			responseObject.orders = data
+
+// 				 			console.log('responseObject', responseObject)
+// 				 			// now that all callbacks are chained we can return the response to the client
+// 				 			res.render('login', { gdaxData: responseObject })
+// 						}
+// 					})
+// 				}
+// 			})
+// 		}
+// 	})
+
+// router.post('/login', function(req, res, next) {
+// 	var gdaxKey = req.body.key;
+// 	var b64secret = Buffer(req.body.secret, 'base64');
+// 	var gdaxPassphrase = req.body.passphrase;
+
+// 	var authedClient = new Gdax.AuthenticatedClient(gdaxKey, b64secret, gdaxPassphrase);
+// 	var responseObject = {}
+// 	responseObject.accountInfo = []
+// 	responseObject.orders = []
+// 	responseObject.fills = []
+// 	authedClient.getAccounts(function(err, response, data) {
+// 		if (err || data.message) {
+// 			console.error('There was an error: ', err || data.message)
+// 			responseObject.error = 'There was an error, ' + data.message
+// 			// res.render('login', { gdaxData: responseObject })
+// 		} else {
+// 			// console.log('account response is successfull: ', data)
+//  			responseObject.accountInfo = data
+
+//  			authedClient.getFills(function(err, response, data) {
+// 				if (err || data.message) {
+// 					console.error('There was an error: ', err || data.message)
+// 					responseObject.error = 'There was an error, ' + data.message
+// 					// res.render('login', { gdaxData: responseObject })
+// 				} else {
+// 					// console.log('fill response is successfull: ', data)
+// 		 			responseObject.fills = data
+
+// 		 			authedClient.getOrders(function(err, response, data) {
+// 						if (err || data.message) {
+// 							console.error('There was an error: ', err || data.message)
+// 							responseObject.error = 'There was an error, ' + data.message
+// 							// res.render('login', { gdaxData: responseObject })
+// 						} else {
+// 							// console.log('order response is successfull: ', data)
+// 				 			responseObject.orders = data
+
+
+// 				 			console.log('responseObject', responseObject)
+// 				 			// now that all callbacks are chained we can return the response to the client
+// 				 			res.send({ gdaxData: responseObject })
+// 						}
+// 					})
+// 				}
+// 			})
+// 		}
+// 	})
+// 	// responseObject.accountInfo = mock_accounts
+// 	// responseObject.orders = mock_orders
+// 	// responseObject.fills = mock_fills
+// 	// res.send(responseObject)
+// })
+
+var request = require('request');
+var crypto = require('crypto');
+
 router.post('/login', function(req, res, next) {
+
 	var gdaxKey = req.body.key;
-	var b64secret = Buffer(req.body.secret, 'base64');
 	var gdaxPassphrase = req.body.passphrase;
 
-	var authedClient = new Gdax.AuthenticatedClient(gdaxKey, b64secret, gdaxPassphrase);
-	var responseObject = {}
-	// responseObject.accountInfo = []
-	// responseObject.orders = []
-	// responseObject.fills = []
-	authedClient.getAccounts(function(err, response, data) {
-		if (err || data.message) {
-			console.error('There was an error: ', err || data.message)
-			responseObject.error = 'There was an error, ' + data.message
-			res.render('login', { gdaxData: responseObject })
-		} else {
-			console.log('account response is successfull: ', data)
- 			responseObject.accountInfo = data
+	var timestamp = Date.now() / 1000;
+	var requestPath = req.body.path.toString();
 
- 			authedClient.getFills(function(err, response, data) {
-				if (err || data.message) {
-					console.error('There was an error: ', err || data.message)
-					responseObject.error = 'There was an error, ' + data.message
-					res.render('login', { gdaxData: responseObject })
-				} else {
-					console.log('fill response is successfull: ', data)
-		 			responseObject.fills = data
+	var what = timestamp + 'GET' + requestPath;
 
-		 			authedClient.getOrders(function(err, response, data) {
-						if (err || data.message) {
-							console.error('There was an error: ', err || data.message)
-							responseObject.error = 'There was an error, ' + data.message
-							res.render('login', { gdaxData: responseObject })
-						} else {
-							console.log('order response is successfull: ', data)
-				 			responseObject.orders = data
+	var b64secret = Buffer(req.body.secret, 'base64');
+	var hmac = crypto.createHmac('sha256', b64secret);
+	var sign = hmac.update(what).digest('base64');
+	console.log(requestPath, what, sign)
 
-				 			console.log('responseObject', responseObject)
-				 			// now that all callbacks are chained we can return the response to the client
-				 			res.render('login', { gdaxData: responseObject })
-						}
-					})
-				}
-			})
-		}
+	var options = {
+	  url: 'https://api.gdax.com' + requestPath,
+	  headers: {
+	  	'User-Agent': 'request',
+	  	'content-type': 'application/json',
+	    'CB-ACCESS-KEY': gdaxKey.toString(),
+		'CB-ACCESS-SIGN': sign,
+		'CB-ACCESS-TIMESTAMP': timestamp,
+		'CB-ACCESS-PASSPHRASE': gdaxPassphrase
+	  }
+	};
+
+	request(options, function callback(error, response, body) {
+		// console.log(error, response, body)
+	  if (!error) {
+	    var info = JSON.parse(body);
+	    console.log('res successfull: ', info)
+	    res.json(info)
+	  } else {
+	    console.log('res error: ', error)
+	  	res.json(error)
+	  }
 	})
-	// responseObject.accountInfo = mock_accounts
-	// responseObject.orders = mock_orders
-	// responseObject.fills = mock_fills
 })
 
 module.exports = router;
